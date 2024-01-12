@@ -10,7 +10,7 @@ import OSLog
 import Combine
 
 public enum OperationState<Output> {
-
+    
     case initial
     case inProgress(Task<Void, Never>)
     case success(Output)
@@ -25,13 +25,22 @@ public enum OperationState<Output> {
         }
     }
     
+    public var timeToHide: Bool {
+        switch self {
+        case .canceled, .success: true
+        default: false
+        }
+    }
+    
     public var str: String {
         return "\(self)"
     }
 }
 
-public class OperationVM<Input, Output>: ObservableObject {
+public class OperationVM<Input, Output>: ObservableObject, Identifiable {
 	
+    public let id = UUID().uuidString
+    
 	public typealias Operation = (Input) async throws -> Output
 	public typealias Validator = (Input) -> String?
 	

@@ -48,12 +48,9 @@ struct TextOperationView<Output>: View {
 }
 
 #Preview {
-    TextOperationView(vm: OperationVM(title: "Sample") { text in
-		try! await Task.sleep(for: .seconds(1))
-		if Bool.random() || Bool.random() {
-			throw NSError()
-		} else {
-			print("whoa! the text is: \(text)")
-		}
-	})
+    TextOperationView(vm: Preview.operationVM)
+}
+
+#Preview {
+    TextOperationView(vm: Preview.operationVM)
 }
