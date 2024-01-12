@@ -12,7 +12,7 @@ class Preview {
     static let operationVM = makeOperationVM()
     
     static func makeOperationVM() -> OperationVM<String, Void> {
-        OperationVM(title: "Sample") { text in
+        OperationVM { text in
             try! await Task.sleep(for: .seconds(1))
             if Bool.random() || Bool.random() {
                 throw NSError()

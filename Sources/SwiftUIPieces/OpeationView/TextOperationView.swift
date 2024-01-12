@@ -7,50 +7,75 @@
 
 import SwiftUI
 
-struct TextOperationView<Output>: View {
+public struct TextOperationView<Output>: View {
 	
-	@ObservedObject var vm: OperationVM<String, Output>
+    let title: String
+    let placeholder: String
 	
-    var body: some View {
-		VStack {
-			Group {
-                Text(vm.title)
-                    .font(.title3)
-				TextField("Placeholder", text: $vm.input)
-				HStack {
+    @ObservedObject var vm: OperationVM<String, Output>
+	
+    @FocusState private var focus: Bool
+    
+    public init(
+        _ title: String,
+        placeholder: String = "",
+        _ vm: OperationVM<String, Output>
+    ) {
+        self.vm = vm
+        self.title = title
+        self.placeholder = placeholder
+    }
+    
+    public var body: some View {
+        VStack(spacing: 8) {
+            Group {
+                Text(title)
+                    .font(.title)
+                TextField(placeholder, text: $vm.input)
+                    .focused($focus)
+                    .onSubmit { vm.onSubmit() }
+                Spacer()
+                HStack {
                     Button("Cancel") { vm.onCancel() }
-					Spacer()
-                    Button("Confirm") { vm.onSubmit() }
-				}
-			}
+                        .foregroundStyle(.secondary)
+                        .bold()
+                    Spacer()
+                    Button("Confirm") {
+                        vm.onSubmit()
+                        focus = false
+                    }
+                        .foregroundStyle(.primary)
+                }
+            }
+            .font(.title3)
             .disabled(!vm.state.interactionEnabled)
-			
+            
             switch vm.state {
-			case .inProgress:
-				ProgressView()
-			case .success:
-				Text("Success!")
-					.foregroundStyle(.green)
-			case .validationError(let message):
-				Text("Validation error: \(message)")
-					.foregroundStyle(.red)
-			case .operationFailed(let reason):
-				Text("Operation failed. Reason: \(reason)")
-			case .canceled:
-				Text("Operation cancelled")
-			case .initial:
-				EmptyView()
-			}
-            Text("\(vm.state.str)")
-		}
-		.padding()
+            case .inProgress:
+                ProgressView()
+            case .success:
+                Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+                    .font(.title)
+            case .validationError(let message):
+                Text(message)
+                    .foregroundStyle(.red)
+            case .operationFailed(let reason):
+                Text(reason)
+                    .foregroundStyle(.red)
+            case .canceled, .initial:
+                EmptyView()
+            }
+        }
+        .padding()
+        .onAppear { focus = true }
     }
 }
 
 #Preview {
-    TextOperationView(vm: Preview.operationVM)
+    TextOperationView("Preview", Preview.operationVM)
 }
 
 #Preview {
-    TextOperationView(vm: Preview.operationVM)
+    TextOperationView("Preview", Preview.operationVM)
 }

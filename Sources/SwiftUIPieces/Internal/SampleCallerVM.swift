@@ -19,7 +19,7 @@ class SampleCallerVM: ObservableObject {
     
     init() {
         subscribeToTitleUpdates()
-        subscribeToAddVmNullifier()
+        $addVM.nullifyOnFinish()
     }
     
     func onAdd() {
@@ -28,35 +28,25 @@ class SampleCallerVM: ObservableObject {
 }
 
 private extension SampleCallerVM {
-    
-    func subscribeToAddVmNullifier() {
-        $addVM
-            .compactMap { $0 }
-            .flatMap(\.$state)
-            .debounce(for: .seconds(0.7), scheduler: DispatchQueue.main)
-            .filter(\.timeToHide)
-            .map { _ in nil }
-            .assign(to: &$addVM)
-    }
-    
+
     func subscribeToTitleUpdates() {
         $addVM
             .flatMap { newVM in
                 if let newVM {
-                    newVM
-                        .$state
+                    newVM.$state
                         .map(self.title(for:))
                         .eraseToAnyPublisher()
                 } else {
-                    Just("No action requested")
+                    Just(self.title(for: nil))
                         .eraseToAnyPublisher()
                 }
             }
             .assign(to: &$title)
     }
     
-    private func title(for opState: OperationState<Void>) -> String {
+    private func title(for opState: OperationState<Void>?) -> String {
         switch opState {
+        case nil: "No op requested"
         case .initial, .canceled: "Waiting for input"
         case .success: "Done"
         case .inProgress: "Runnin'"

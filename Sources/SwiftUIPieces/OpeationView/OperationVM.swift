@@ -51,7 +51,6 @@ public class OperationVM<Input, Output>: ObservableObject, Identifiable {
 	
 	public var validate: Validator? = nil
 
-	public let title: String
 	public let operation: Operation
 	
     private var cancellables = Set<AnyCancellable>()
@@ -59,11 +58,9 @@ public class OperationVM<Input, Output>: ObservableObject, Identifiable {
     
 	public init(
         _ input: Input,
-		title: String,
 		operation: @escaping Operation,
 		validate: Validator?
     ) {
-		self.title = title
 		self.input = input
 		self.operation = operation
 		self.validate = validate
@@ -113,14 +110,19 @@ private extension OperationVM {
     }
 }
 
+public extension OperationVM where Input == Void {
+    convenience init(operation: @escaping Operation) {
+        self.init((),operation: operation, validate: nil)
+    }
+}
+
 public extension OperationVM where Input == String {
 
     convenience init(
-        title: String,
         operation: @escaping Operation,
         validate: Validator? = { $0.isEmpty ? "Must not be empty" : nil }
     ) {
-        self.init("", title: title, operation: operation, validate: validate)
+        self.init("", operation: operation, validate: validate)
     }
 
 }

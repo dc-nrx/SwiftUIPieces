@@ -19,8 +19,8 @@ struct SampleCallerView: View {
             Button("Add") { vm.onAdd() }
         }
         .sheet(item: $vm.addVM) { addVM in
-            TextOperationView(vm: addVM)
-                .presentationDetents([.fraction(0.2), .large])
+            TextOperationView("Preview", addVM)
+                .presentationDetents([.fraction(0.3), .large])
         }
     }
 }
