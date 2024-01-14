@@ -16,12 +16,29 @@ struct SampleCallerView: View {
             Text(vm.title)
                 .font(.title)
             Spacer()
-            Button("Add") { vm.onAdd() }
+            HStack {
+                Button("Launch Void") { vm.onVoid() }
+                Spacer()
+                Button("Add") { vm.onAdd() }
+            }
+            .padding()
         }
         .sheet(item: $vm.addVM) { addVM in
             TextOperationView("Preview", addVM)
                 .presentationDetents([.fraction(0.3), .large])
+                .animation(.easeInOut)
         }
+        .overlay {
+            if let voidVM = vm.voidVM {
+                switch voidVM.state {
+                case .inProgress: ProgressView()
+                case .success: Image(systemName: "checkmark.circle.fill")
+                        .foregroundStyle(.green)
+                default: Text("Unexpected")
+                }
+            }
+        }
+        .animation(.easeInOut)
     }
 }
 

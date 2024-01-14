@@ -35,6 +35,8 @@ public struct TextOperationView: View {
                     .focused($focus)
                     .onSubmit { vm.execute() }
                 Spacer()
+                stateView
+                Spacer()
                 HStack {
                     Button("Cancel") { vm.cancel() }
                         .foregroundStyle(.secondary)
@@ -49,26 +51,29 @@ public struct TextOperationView: View {
             }
             .font(.title3)
             .disabled(!vm.state.interactionEnabled)
-            
-            switch vm.state {
-            case .inProgress:
-                ProgressView()
-            case .success:
-                Image(systemName: "checkmark.circle.fill")
-                    .foregroundStyle(.green)
-                    .font(.title)
-            case .validationError(let message):
-                Text(message)
-                    .foregroundStyle(.red)
-            case .operationFailed(let reason):
-                Text(reason)
-                    .foregroundStyle(.red)
-            case .canceled, .initial:
-                EmptyView()
-            }
         }
         .padding()
         .onAppear { focus = true }
+    }
+    
+    @ViewBuilder
+    private var stateView: some View {
+        switch vm.state {
+        case .inProgress:
+            ProgressView()
+        case .success:
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(.green)
+                .font(.title)
+        case .validationError(let message):
+            Text(message)
+                .foregroundStyle(.red)
+        case .operationFailed(let reason):
+            Text(reason)
+                .foregroundStyle(.red)
+        case .canceled, .initial:
+            EmptyView()
+        }
     }
 }
 

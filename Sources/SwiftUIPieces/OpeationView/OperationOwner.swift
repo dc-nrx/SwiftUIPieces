@@ -9,23 +9,50 @@ import Foundation
 import Combine
 
 public extension Published<InputOperationVM<String>?>.Publisher {
-    mutating func nullifyOnFinish() {
+    mutating func nullifyOnFinish(
+        waitAfterSuccess: DispatchQueue.SchedulerTimeType.Stride? = .seconds(1)
+    ) {
         compactMap { $0 }
             .flatMap(\.$state)
-            .debounce(for: .seconds(0.7), scheduler: DispatchQueue.main)
-            .filter(\.timeToHide)
+            .filter(\.isFinal)
+            .debounce(for: waitAfterSuccess, scheduler: DispatchQueue.main) { $0.isSuccess }
             .map { _ in nil }
             .assign(to: &self)
     }
 }
 
-public extension Published<VoidOperation?>.Publisher {
-    mutating func nullifyOnFinish() {
+public extension Published<VoidOperationVM?>.Publisher {
+    mutating func nullifyOnFinish(
+        waitAfterSuccess: DispatchQueue.SchedulerTimeType.Stride? = .seconds(1)
+    ) {
         compactMap { $0 }
             .flatMap(\.$state)
-            .debounce(for: .seconds(0.7), scheduler: DispatchQueue.main)
-            .filter(\.timeToHide)
+            .filter(\.isFinal)
+            .debounce(for: waitAfterSuccess, scheduler: DispatchQueue.main) { $0.isSuccess }
             .map { _ in nil }
             .assign(to: &self)
     }
+
+}
+
+private extension Publisher {
+  func debounce<S>(
+    for dueTime: S.SchedulerTimeType.Stride?,
+    scheduler: S,
+    options: S.SchedulerOptions? = nil,
+    shouldDebounce: @escaping (Output) -> Bool
+  ) -> AnyPublisher<Output, Failure> where S: Scheduler {
+    map { output in
+      if shouldDebounce(output), let dueTime {
+          Just(output)
+            .delay(for: dueTime, scheduler: scheduler)
+            .eraseToAnyPublisher()
+      } else {
+          Just(output)
+            .eraseToAnyPublisher()
+      }
+    }
+    .switchToLatest()
+    .eraseToAnyPublisher()
+  }
 }

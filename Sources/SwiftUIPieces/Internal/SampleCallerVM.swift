@@ -15,15 +15,25 @@ class SampleCallerVM: ObservableObject {
     var addVM: InputOperationVM<String>?
     
     @Published
+    var voidVM: VoidOperationVM?
+    
+    @Published
     var title: String = ""
     
     init() {
         subscribeToTitleUpdates()
         $addVM.nullifyOnFinish()
+        $voidVM.nullifyOnFinish()
     }
     
     func onAdd() {
         addVM = Preview.makeInputOpVM()
+    }
+    
+    func onVoid() {
+        voidVM = .init {
+            try await Task.sleep(for: .seconds(0.5))
+        }
     }
 }
 
@@ -42,6 +52,20 @@ private extension SampleCallerVM {
                 }
             }
             .assign(to: &$title)
+        
+        $voidVM
+            .flatMap { newVM in
+                if let newVM {
+                    newVM.$state
+                        .map(self.title(for:))
+                        .eraseToAnyPublisher()
+                } else {
+                    Just(self.title(for: nil))
+                        .eraseToAnyPublisher()
+                }
+            }
+            .assign(to: &$title)
+
     }
     
     private func title(for opState: OperationState<Void>?) -> String {

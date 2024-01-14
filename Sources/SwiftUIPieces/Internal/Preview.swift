@@ -14,11 +14,23 @@ class Preview {
     static func makeInputOpVM() -> InputOperationVM<String> {
         InputOperationVM { text in
             try! await Task.sleep(for: .seconds(1))
-            if Bool.random() || Bool.random() {
+            if Bool.random() {
                 throw NSError()
             } else {
                 print("whoa! the text is: \(text)")
             }
         }
     }
+    
+//    static func makeVoidOpVM() -> InputOperationVM<String> {
+//        InputOperationVM { text in
+//            try! await Task.sleep(for: .seconds(1))
+//            if Bool.random() || Bool.random() {
+//                throw NSError()
+//            } else {
+//                print("whoa! the text is: \(text)")
+//            }
+//        }
+//    }
+
 }
