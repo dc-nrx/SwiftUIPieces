@@ -37,65 +37,89 @@ public enum OperationState<Output> {
     }
 }
 
+
+final class VoidOperation: OperationVM<Void, Void> {
+    
+    @MainActor
+    public func execute() {
+        execute(())
+    }
+}
+
+public typealias InputOperationVM<Input> = InoutOperationVM<Input, Void>
+
+final public class InoutOperationVM<Input, Output>: OperationVM<Input, Output> {
+
+    @Published public var input: Input
+
+    public typealias Validator = (Input) -> String?
+    public var validate: Validator? = nil
+
+    @MainActor
+    public func execute() {
+        if let validationErrorReason = validate?(input) {
+            state = .validationError(validationErrorReason)
+            return
+        }
+        
+        super.execute(input)
+    }
+    
+    public init(
+        _ input: Input,
+        operation: @escaping Operation,
+        validate: Validator?
+    ) {
+        self.input = input
+        self.validate = validate
+        super.init(operation)
+    }
+}
+
+/**
+ An abstract superclass
+ */
 public class OperationVM<Input, Output>: ObservableObject, Identifiable {
 	
     public let id = UUID().uuidString
     
 	public typealias Operation = (Input) async throws -> Output
-	public typealias Validator = (Input) -> String?
 	
 	@Published @MainActor
     public var state: OperationState<Output> = .initial
-    
-	@Published public var input: Input
-	
-	public var validate: Validator? = nil
-
+    	
 	public let operation: Operation
 	
     private var cancellables = Set<AnyCancellable>()
     lazy private var logger = Logger(subsystem: "SwiftUIPieces", category: "\(type(of: self))")
     
-	public init(
-        _ input: Input,
-		operation: @escaping Operation,
-		validate: Validator?
-    ) {
-		self.input = input
+	internal init(_ operation: @escaping Operation) {
 		self.operation = operation
-		self.validate = validate
         
         setupLogging()
 	}
 	
     @MainActor
-	public func onCancel() {
+	public func cancel() {
         // For `inProgress` flow, the state will eventually become either `cancelled`
         // if cancellation happened, or one of `finished` (success/fail) otherwise.
         if case let .inProgress(task) = state { task.cancel() }
         else { state = .canceled }
 	}
 	
-    @MainActor 
-    public func onSubmit() {
-        guard state.interactionEnabled else { return }
-        
-		if let validationErrorReason = validate?(input) {
-			state = .validationError(validationErrorReason)
-			return
-		}
-        
-		let task = Task {
-			do {
-				let result = try await operation(input)
-				state = .success(result)
-			} catch {
+    @MainActor
+    func execute(_ input: Input) {
+        let task = Task {
+            do {
+                let result = try await operation(input)
+                state = .success(result)
+            } catch {
                 if error is CancellationError { state = .canceled }
                 else { state = .operationFailed("Smth went wrong"/*error.localizedDescription*/) }
-			}
-		}
-		state = .inProgress(task)
-	}
+            }
+        }
+        state = .inProgress(task)
+    }
 }
 
 private extension OperationVM {
@@ -110,13 +134,7 @@ private extension OperationVM {
     }
 }
 
-public extension OperationVM where Input == Void {
-    convenience init(operation: @escaping Operation) {
-        self.init((),operation: operation, validate: nil)
-    }
-}
-
-public extension OperationVM where Input == String {
+public extension InoutOperationVM where Input == String {
 
     convenience init(
         operation: @escaping Operation,

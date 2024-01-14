@@ -9,10 +9,10 @@ import Foundation
 
 class Preview {
     
-    static let operationVM = makeOperationVM()
+    static let inputOpVM = makeInputOpVM()
     
-    static func makeOperationVM() -> OperationVM<String, Void> {
-        OperationVM { text in
+    static func makeInputOpVM() -> InputOperationVM<String> {
+        InputOperationVM { text in
             try! await Task.sleep(for: .seconds(1))
             if Bool.random() || Bool.random() {
                 throw NSError()

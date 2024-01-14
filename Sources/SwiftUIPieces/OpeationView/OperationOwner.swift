@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-public extension Published<OperationVM<String, Void>?>.Publisher {
+public extension Published<InputOperationVM<String>?>.Publisher {
     mutating func nullifyOnFinish() {
         compactMap { $0 }
             .flatMap(\.$state)
@@ -19,7 +19,7 @@ public extension Published<OperationVM<String, Void>?>.Publisher {
     }
 }
 
-public extension Published<OperationVM<Void, Void>?>.Publisher {
+public extension Published<VoidOperation?>.Publisher {
     mutating func nullifyOnFinish() {
         compactMap { $0 }
             .flatMap(\.$state)

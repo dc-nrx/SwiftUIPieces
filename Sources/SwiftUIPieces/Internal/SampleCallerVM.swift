@@ -12,7 +12,7 @@ import Combine
 class SampleCallerVM: ObservableObject {
     
     @Published
-    var addVM: OperationVM<String, Void>?
+    var addVM: InputOperationVM<String>?
     
     @Published
     var title: String = ""
@@ -23,7 +23,7 @@ class SampleCallerVM: ObservableObject {
     }
     
     func onAdd() {
-        addVM = Preview.makeOperationVM()
+        addVM = Preview.makeInputOpVM()
     }
 }
 

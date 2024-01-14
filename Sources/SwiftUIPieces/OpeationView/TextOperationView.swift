@@ -7,19 +7,19 @@
 
 import SwiftUI
 
-public struct TextOperationView<Output>: View {
+public struct TextOperationView: View {
 	
     let title: String
     let placeholder: String
 	
-    @ObservedObject var vm: OperationVM<String, Output>
+    @ObservedObject var vm: InputOperationVM<String>
 	
     @FocusState private var focus: Bool
     
     public init(
         _ title: String,
         placeholder: String = "",
-        _ vm: OperationVM<String, Output>
+        _ vm: InputOperationVM<String>
     ) {
         self.vm = vm
         self.title = title
@@ -33,15 +33,15 @@ public struct TextOperationView<Output>: View {
                     .font(.title)
                 TextField(placeholder, text: $vm.input)
                     .focused($focus)
-                    .onSubmit { vm.onSubmit() }
+                    .onSubmit { vm.execute() }
                 Spacer()
                 HStack {
-                    Button("Cancel") { vm.onCancel() }
+                    Button("Cancel") { vm.cancel() }
                         .foregroundStyle(.secondary)
                         .bold()
                     Spacer()
                     Button("Confirm") {
-                        vm.onSubmit()
+                        vm.execute()
                         focus = false
                     }
                         .foregroundStyle(.primary)
@@ -73,9 +73,9 @@ public struct TextOperationView<Output>: View {
 }
 
 #Preview {
-    TextOperationView("Preview", Preview.operationVM)
+    TextOperationView("Preview", Preview.inputOpVM)
 }
 
 #Preview {
-    TextOperationView("Preview", Preview.operationVM)
+    TextOperationView("Preview", Preview.inputOpVM)
 }
