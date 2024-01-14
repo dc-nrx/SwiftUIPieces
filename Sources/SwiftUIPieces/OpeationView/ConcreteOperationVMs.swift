@@ -7,10 +7,10 @@
 
 import Foundation
 
-final public class VoidOperationVM: AbstractOperationVM<Void, Void> {
+final public class VoidOperation: AbstractOperation<Void, Void> {
     
     public init(
-        _ operation: @escaping Operation,
+        _ operation: @escaping Function,
         execOnInit: Bool = true
     ) {
         super.init(operation)
@@ -25,9 +25,9 @@ final public class VoidOperationVM: AbstractOperationVM<Void, Void> {
     }
 }
 
-public typealias InputOperationVM<Input> = InoutOperationVM<Input, Void>
+public typealias InputOperation<Input> = InoutOperation<Input, Void>
 
-final public class InoutOperationVM<Input, Output>: AbstractOperationVM<Input, Output> {
+final public class InoutOperation<Input, Output>: AbstractOperation<Input, Output> {
 
     @Published public var input: Input
 
@@ -46,7 +46,7 @@ final public class InoutOperationVM<Input, Output>: AbstractOperationVM<Input, O
     
     public init(
         _ input: Input,
-        operation: @escaping Operation,
+        operation: @escaping Function,
         validate: Validator?
     ) {
         self.input = input
@@ -55,10 +55,10 @@ final public class InoutOperationVM<Input, Output>: AbstractOperationVM<Input, O
     }
 }
 
-public extension InoutOperationVM where Input == String {
+public extension InoutOperation where Input == String {
 
     convenience init(
-        operation: @escaping Operation,
+        operation: @escaping Function,
         validate: Validator? = { $0.isEmpty ? "Must not be empty" : nil }
     ) {
         self.init("", operation: operation, validate: validate)

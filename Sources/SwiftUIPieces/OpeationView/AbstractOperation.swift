@@ -9,23 +9,23 @@ import Foundation
 import OSLog
 import Combine
 
-public class AbstractOperationVM<Input, Output>: ObservableObject, Identifiable {
+public class AbstractOperation<Input, Output>: ObservableObject, Identifiable {
 	
-    public typealias Operation = (Input) async throws -> Output
+    public typealias Function = (Input) async throws -> Output
 
     @Published @MainActor
     public var state: OperationState<Output> = .initial
 
-    public let id = UUID().uuidString
-	public let operation: Operation
+    public let id = UUID()
+	public let function: Function
     
     private var cancellables = Set<AnyCancellable>()
     lazy private var logger = Logger(subsystem: "SwiftUIPieces", category: "\(type(of: self))")
     
 	public init(
-        _ operation: @escaping Operation
+        _ function: @escaping Function
     ) {
-		self.operation = operation
+		self.function = function
         setupLogging()
 	}
 	
@@ -39,14 +39,13 @@ public class AbstractOperationVM<Input, Output>: ObservableObject, Identifiable 
     @MainActor internal func execute(_ input: Input) {
         state = .inProgress( Task {
             do {
-                let result = try await operation(input)
+                let result = try await function(input)
                 state = .success(result)
             } catch {
                 if error is CancellationError { state = .canceled }
                 else { state = .operationFailed("Smth went wrong"/*error.localizedDescription*/) }
             }
         })
-//        state = .inProgress(task)
     }
     
     private func setupLogging() {

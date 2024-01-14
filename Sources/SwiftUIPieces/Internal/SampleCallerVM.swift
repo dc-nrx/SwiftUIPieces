@@ -12,10 +12,10 @@ import Combine
 class SampleCallerVM: ObservableObject {
     
     @Published
-    var addVM: InputOperationVM<String>?
+    var addVM: InputOperation<String>?
     
     @Published
-    var voidVM: VoidOperationVM?
+    var voidVM: VoidOperation?
     
     @Published
     var title: String = ""

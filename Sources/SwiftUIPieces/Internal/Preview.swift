@@ -11,8 +11,8 @@ class Preview {
     
     static let inputOpVM = makeInputOpVM()
     
-    static func makeInputOpVM() -> InputOperationVM<String> {
-        InputOperationVM { text in
+    static func makeInputOpVM() -> InputOperation<String> {
+        InputOperation { text in
             try! await Task.sleep(for: .seconds(1))
             if Bool.random() {
                 throw NSError()
@@ -22,8 +22,8 @@ class Preview {
         }
     }
     
-//    static func makeVoidOpVM() -> InputOperationVM<String> {
-//        InputOperationVM { text in
+//    static func makeVoidOpVM() -> InputOperation<String> {
+//        InputOperation { text in
 //            try! await Task.sleep(for: .seconds(1))
 //            if Bool.random() || Bool.random() {
 //                throw NSError()

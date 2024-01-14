@@ -8,7 +8,7 @@
 import Foundation
 import Combine
 
-public extension Published<InputOperationVM<String>?>.Publisher {
+public extension Published<InputOperation<String>?>.Publisher {
     mutating func nullifyOnFinish(
         waitAfterSuccess: DispatchQueue.SchedulerTimeType.Stride? = .seconds(1)
     ) {
@@ -21,7 +21,7 @@ public extension Published<InputOperationVM<String>?>.Publisher {
     }
 }
 
-public extension Published<VoidOperationVM?>.Publisher {
+public extension Published<VoidOperation?>.Publisher {
     mutating func nullifyOnFinish(
         waitAfterSuccess: DispatchQueue.SchedulerTimeType.Stride? = .seconds(1)
     ) {
