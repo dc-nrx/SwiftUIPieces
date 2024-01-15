@@ -14,14 +14,17 @@ public extension View {
         onDismiss: (() -> Void)? = nil, 
         @ViewBuilder content: @escaping (Item) -> Content
     ) -> some View where Item : Identifiable, Content : View {
-        EmptyView()
+        FullScreenContainer(item: item, content: content)
     }
 }
 
-struct FullScreenContainer: View {
+struct FullScreenContainer<Item, Content>: View where Item : Identifiable, Content : View {
   @State var isFullScreenCoverPresented = false
 //  @State var isFullScreenViewVisible = false
 
+    @Binding public var item: Item?
+    @ViewBuilder public var content: (Item) -> Content
+    
     @State var k = 1
     
     var isFullScreenViewVisible: Bool { k % 2 == 0 }
@@ -72,6 +75,17 @@ struct FullScreenView: View {
   }
 }
 
+extension Int: Identifiable {
+    public var id: Int { self }
+}
+
+
 #Preview {
-    FullScreenContainer()
+    Text("azaza")
+        .customFullScreen(item: .constant(1)) { 
+            Text("\($0)")
+        }
+//    FullScreenContainer(item: .constant(Optional(1))) { item in
+//        Text("")
+//    }
 }
