@@ -9,70 +9,74 @@ import Foundation
 import SwiftUI
 
 public extension View {
-    func customFullScreen<Item, Content>(
+    func fullScreenOverlay<Item, Content>(
         item: Binding<Item?>,
-        onDismiss: (() -> Void)? = nil, 
         @ViewBuilder content: @escaping (Item) -> Content
     ) -> some View where Item : Identifiable, Content : View {
-        FullScreenContainer(item: item, content: content)
+        FullScreenOverlay(item, parent: self, content: content)
+            .background(.yellow)
     }
 }
 
-struct FullScreenContainer<Item, Content>: View where Item : Identifiable, Content : View {
-  @State var isFullScreenCoverPresented = false
-//  @State var isFullScreenViewVisible = false
+struct FullScreenOverlay<Item, Content, Parent>: View where Item : Identifiable, Content : View, Parent: View {
+    
+    @State private var isFullScreenCoverPresented = false
+    @State private var isFullScreenViewVisible = false
 
     @Binding public var item: Item?
+    public var parent: Parent
     @ViewBuilder public var content: (Item) -> Content
     
-    @State var k = 1
-    
-    var isFullScreenViewVisible: Bool { k % 2 == 0 }
+    public init(
+        _ item: Binding<Item?>,
+        parent: Parent,
+        @ViewBuilder content: @escaping (Item) -> Content
+    ) where Item : Identifiable, Content : View {
+        self._item = item
+        self.parent = parent
+        self.content = content
+    }
     
   var body: some View {
-    VStack {
-        Text("xcc")
-        Spacer()
-      Button("Tap me") {
-        isFullScreenCoverPresented = true
-      }
-    }.fullScreenCover(isPresented: $isFullScreenCoverPresented) {
-      Group {
-        if isFullScreenViewVisible {
-          FullScreenView(k: $k)
-            .onDisappear {
-              // dismiss the FullScreenCover
-              isFullScreenCoverPresented = false
-            }
-        }
-      }
-      .onAppear {
-        k = 2
-      }
+      parent
+          .background(.blue)
+          .fullScreenCover(item: $item, content: content)
+              
+//      Group {
+//        if isFullScreenViewVisible {
+//          FullScreenView(item: $item)
+//            .onDisappear {
+//              // dismiss the FullScreenCover
+//              isFullScreenCoverPresented = false
+//            }
+//        }
+//      }
+//      .onAppear {
+//
+//      }
     }
-    .transaction({ transaction in
-      // disable the default FullScreenCover animation
-      transaction.disablesAnimations = true
-
-      // add custom animation for presenting and dismissing the FullScreenCover
-        transaction.animation = .easeInOut(duration: 0.4)
-    })
-  }
+//    .transaction({ transaction in
+//      // disable the default FullScreenCover animation
+//      transaction.disablesAnimations = true
+//
+//      // add custom animation for presenting and dismissing the FullScreenCover
+//        transaction.animation = .easeInOut(duration: 0.4)
+//    })
+//  }
 }
 
-struct FullScreenView: View {
-//  @Binding var isVisible: Bool
+struct PlaygroundOwner: View {
 
-    @Binding var k: Int
-  var body: some View {
-    VStack {
-      Button("Dismiss") {
-        k = 1
-      }
-      .frame(maxWidth: .infinity, maxHeight: .infinity)
-      .presentationBackground(.green.opacity(0.5))
+    @State var item: Int?
+    
+    var body: some View {
+        Button("Show") { item = 1 }
+            .fullScreenOverlay(item: $item) { anItem in
+                Text("\(anItem)")
+                    .presentationBackground(.green.opacity(0.5))
+                Button("Hide") { item = nil}
+            }
     }
-  }
 }
 
 extension Int: Identifiable {
@@ -81,11 +85,5 @@ extension Int: Identifiable {
 
 
 #Preview {
-    Text("azaza")
-        .customFullScreen(item: .constant(1)) { 
-            Text("\($0)")
-        }
-//    FullScreenContainer(item: .constant(Optional(1))) { item in
-//        Text("")
-//    }
+    PlaygroundOwner()
 }
