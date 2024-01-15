@@ -14,6 +14,9 @@ final public class VoidOperation: Operation<Void, Void> {
         execOnInit: Bool = true
     ) {
         super.init(function)
+        if execOnInit {
+            Task { await execute() }
+        }
     }
     
     public convenience init(

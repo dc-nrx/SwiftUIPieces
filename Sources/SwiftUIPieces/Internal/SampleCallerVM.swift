@@ -31,9 +31,7 @@ class SampleCallerVM: ObservableObject {
     }
     
     func onVoid() {
-        voidVM = .init {
-            try await Task.sleep(for: .seconds(0.5))
-        }
+        voidVM = .init { try await Task.sleep(for: .seconds(2.5)) }
     }
 }
 

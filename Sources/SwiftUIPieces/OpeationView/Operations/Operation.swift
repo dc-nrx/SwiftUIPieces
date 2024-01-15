@@ -41,18 +41,10 @@ public class Operation<Input, Output>: ObservableObject, Identifiable {
         else { state = .canceled }
 	}
 	
-    @MainActor internal func execute(_ input: Input) {
+    @MainActor internal func execute(_ input: Input) {        
         switch function {
         case .sync(let f): execSync(f, input)
         case .async(let f): execAsync(f, input)
-            state = .inProgress( Task {
-                do {
-                    try await state = .success(f(input))
-                } catch {
-                    if error is CancellationError { state = .canceled }
-                    else { state = .operationFailed("Smth went wrong"/*error.localizedDescription*/) }
-                }
-            })
         }
     }
 }
@@ -79,10 +71,10 @@ private extension Operation {
     }
 
     private func setupLogging() {
-        $state.sink { [weak self] newState in
+        $state.sink { [logger] newState in
             let message = "State changed to [\(newState)]"
-            self?.logger.debug("\(message)")
-            print(message)
+            logger.debug("\(message)")
+            print(message) // for previews
         }
         .store(in: &cancellables)
     }

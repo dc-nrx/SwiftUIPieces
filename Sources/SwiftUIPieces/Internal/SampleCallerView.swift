@@ -10,7 +10,8 @@ import SwiftUI
 struct SampleCallerView: View {
         
     @StateObject var vm = SampleCallerVM()
-
+    @State var fullscreenOverlayShown = false
+    
     var body: some View {
         VStack {
             Text(vm.title)
@@ -23,22 +24,30 @@ struct SampleCallerView: View {
             }
             .padding()
         }
+        .background(.green.opacity(0.3))
         .sheet(item: $vm.addVM) { addVM in
-            TextOperationView("Preview", addVM)
-                .presentationDetents([.fraction(0.3), .large])
-                .animation(.easeInOut)
+//            withAnimation {
+                TextOperationView("Preview", addVM)
+                    .presentationDetents([.fraction(0.3), .large])
+//            }
         }
-        .overlay {
-            if let voidVM = vm.voidVM {
-                switch voidVM.state {
-                case .inProgress: ProgressView()
-                case .success: Image(systemName: "checkmark.circle.fill")
-                        .foregroundStyle(.green)
-                default: Text("Unexpected")
-                }
+        .fullScreenCover(item: $vm.voidVM) { voidVM in
+            switch voidVM.state {
+            case .inProgress: ProgressView()
+                    .background(.yellow.opacity(0.3))
+                    .opacity(vm.voidVM == nil ? 0 : 1)
+            case .success: Image(systemName: "checkmark.circle.fill")
+                    .foregroundStyle(.green)
+            default: Text("Unexpected")
             }
         }
-        .animation(.easeInOut)
+//        .transi
+//        .transaction { transaction in
+//            transaction.animation = 
+//        }
+//        .animation(.easeInOut, value: fullscreenOverlayShown)
+//        .animation(.linear(duration: 0.4))
+//            .animation(.linear(duration: 0.5), value: isFullScreenViewVisible)
     }
 }
 
