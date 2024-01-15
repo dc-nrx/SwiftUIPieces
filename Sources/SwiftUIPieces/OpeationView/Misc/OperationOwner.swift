@@ -8,9 +8,9 @@
 import Foundation
 import Combine
 
-public extension Published<InputOperation<String>?>.Publisher {
+public extension Published<InputAsyncOperation<String>?>.Publisher {
     mutating func nullifyOnFinish(
-        waitAfterSuccess: DispatchQueue.SchedulerTimeType.Stride? = .seconds(1)
+        waitAfterSuccess: DispatchQueue.SchedulerTimeType.Stride? = .seconds(1.5)
     ) {
         compactMap { $0 }
             .flatMap(\.$state)
@@ -21,9 +21,9 @@ public extension Published<InputOperation<String>?>.Publisher {
     }
 }
 
-public extension Published<VoidOperation?>.Publisher {
+public extension Published<VoidAsyncOperation?>.Publisher {
     mutating func nullifyOnFinish(
-        waitAfterSuccess: DispatchQueue.SchedulerTimeType.Stride? = .seconds(1)
+        waitAfterSuccess: DispatchQueue.SchedulerTimeType.Stride? = nil
     ) {
         compactMap { $0 }
             .flatMap(\.$state)

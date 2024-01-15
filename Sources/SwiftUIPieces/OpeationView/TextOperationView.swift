@@ -12,14 +12,14 @@ public struct TextOperationView: View {
     let title: String
     let placeholder: String
 	
-    @ObservedObject var vm: InputOperation<String>
+    @ObservedObject var vm: InputAsyncOperation<String>
 	
     @FocusState private var focus: Bool
     
     public init(
         _ title: String,
         placeholder: String = "",
-        _ vm: InputOperation<String>
+        _ vm: InputAsyncOperation<String>
     ) {
         self.vm = vm
         self.title = title

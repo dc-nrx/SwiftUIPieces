@@ -9,7 +9,7 @@ import Foundation
 import OSLog
 import Combine
 
-public class AbstractOperation<Input, Output>: ObservableObject, Identifiable {
+public class AsyncOperation<Input, Output>: ObservableObject, Identifiable {
 	
     public typealias Function = (Input) async throws -> Output
 
