@@ -11,8 +11,8 @@ class Preview {
     
     static let inputOpVM = makeInputOpVM()
     
-    static func makeInputOpVM() -> InputAsyncOperation<String> {
-        InputAsyncOperation { text in
+    static func makeInputOpVM() -> InputOperation<String> {
+        .init { text in
             try! await Task.sleep(for: .seconds(1))
             if Bool.random() {
                 throw NSError()

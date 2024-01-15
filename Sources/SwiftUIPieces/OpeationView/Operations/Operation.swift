@@ -9,9 +9,14 @@ import Foundation
 import OSLog
 import Combine
 
-public class AsyncOperation<Input, Output>: ObservableObject, Identifiable {
-	
-    public typealias Function = (Input) async throws -> Output
+public class Operation<Input, Output>: ObservableObject, Identifiable {
+
+    public enum Function {
+        public typealias Async = (Input) async throws -> Output
+        public typealias Sync = (Input) throws -> Output
+        case async(Async)
+        case sync(Sync)
+    }
 
     @Published @MainActor
     public var state: OperationState<Output> = .initial
@@ -23,7 +28,7 @@ public class AsyncOperation<Input, Output>: ObservableObject, Identifiable {
     lazy private var logger = Logger(subsystem: "SwiftUIPieces", category: "\(type(of: self))")
     
 	public init(
-        _ function: @escaping Function
+        _ function: Function
     ) {
 		self.function = function
         setupLogging()
@@ -37,17 +42,42 @@ public class AsyncOperation<Input, Output>: ObservableObject, Identifiable {
 	}
 	
     @MainActor internal func execute(_ input: Input) {
+        switch function {
+        case .sync(let f): execSync(f, input)
+        case .async(let f): execAsync(f, input)
+            state = .inProgress( Task {
+                do {
+                    try await state = .success(f(input))
+                } catch {
+                    if error is CancellationError { state = .canceled }
+                    else { state = .operationFailed("Smth went wrong"/*error.localizedDescription*/) }
+                }
+            })
+        }
+    }
+}
+
+private extension Operation {
+    
+    @MainActor private func execSync(_ f: Function.Sync, _ input: Input) {
+        do {
+            try state = .success(f(input))
+        } catch {
+            state = .operationFailed("Smth went wrong"/*error.localizedDescription*/)
+        }
+    }
+
+    @MainActor private func execAsync(_ f: @escaping Function.Async, _ input: Input) {
         state = .inProgress( Task {
             do {
-                let result = try await function(input)
-                state = .success(result)
+                try await state = .success(f(input))
             } catch {
                 if error is CancellationError { state = .canceled }
                 else { state = .operationFailed("Smth went wrong"/*error.localizedDescription*/) }
             }
         })
     }
-    
+
     private func setupLogging() {
         $state.sink { [weak self] newState in
             let message = "State changed to [\(newState)]"
