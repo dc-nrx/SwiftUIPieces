@@ -54,6 +54,7 @@ public struct TextOperationView: View {
         }
         .padding()
         .onAppear { focus = true }
+        .ignoresSafeArea(.keyboard, edges: .bottom)
     }
     
     @ViewBuilder

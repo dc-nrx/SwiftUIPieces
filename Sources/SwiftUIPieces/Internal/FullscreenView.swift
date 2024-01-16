@@ -14,18 +14,17 @@ public extension View {
         @ViewBuilder content: @escaping (Item) -> Content
     ) -> some View where Item : Identifiable, Content : View {
         FullScreenOverlay(item, parent: self, content: content)
-            .background(.yellow)
     }
 }
 
 struct FullScreenOverlay<Item, Content, Parent>: View where Item : Identifiable, Content : View, Parent: View {
-    
-    @State private var isFullScreenCoverPresented = false
-    @State private var isFullScreenViewVisible = false
 
-    @Binding public var item: Item?
     public var parent: Parent
     @ViewBuilder public var content: (Item) -> Content
+    @Binding public var item: Item?
+
+    @State private var doubleState = (presented: false, visible: false)
+    @State private var animationInProgress = false
     
     public init(
         _ item: Binding<Item?>,
@@ -37,17 +36,26 @@ struct FullScreenOverlay<Item, Content, Parent>: View where Item : Identifiable,
         self.content = content
     }
     
+//    func updateDS() {
+//        switch (item, animationInProgress):
+//        case (nil,)
+//    }
+    
   var body: some View {
       parent
-          .background(.blue)
-          .fullScreenCover(item: $item, content: content)
+          .background(.yellow)
+          .fullScreenCover(isPresented: $doubleState.presented) {
+              if let item {
+                  content(item)
+              }
+          }
               
 //      Group {
-//        if isFullScreenViewVisible {
+//        if isCoverVisible {
 //          FullScreenView(item: $item)
 //            .onDisappear {
 //              // dismiss the FullScreenCover
-//              isFullScreenCoverPresented = false
+//              isCoverPresented = false
 //            }
 //        }
 //      }
